@@ -1,0 +1,75 @@
+body{
+    background-image: url('main-image/background-main.png');
+    background-size: cover; 
+    background-position: center; 
+    background-repeat: no-repeat; 
+    background-attachment: fixed; 
+    display: flex;
+    flex-direction: column;
+   
+}
+
+/* Dropdown menu của shape */
+ul,
+.eraser-container {
+    list-style: none; 
+}
+
+.shape-list {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.sub-shape-list {
+    display: none; 
+    position: absolute;
+    background: white;
+    padding: 10px;
+    margin-top: 5px;
+}
+
+.sub-shape-list.active {
+    display: block; 
+}
+
+/* Thanh trượt eraser */
+#eraser-size {
+    display: none;  
+    position: absolute;
+    margin-top: 5px;
+    height: 100px;  
+    writing-mode: vertical-lr;
+    transform: rotate(180deg);
+    -webkit-appearance: none; 
+    background: transparent;
+}
+
+#eraser-size::-webkit-slider-runnable-track {
+    width: 8px;
+    background: #ff8bb4; 
+    border-radius: 5px;
+    box-shadow: 0px 0px 0px 2px #f14f81; 
+}
+
+#eraser-size::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #fffbdd;
+    border: 2px solid #f14f81;
+    border-radius: 50%;
+    cursor: pointer;
+    position: relative;
+    margin: 0px -4px;
+}
+
+.drawingBoard {
+    background-color: white;
+    border: 0px;
+    position: absolute;
+    margin: 153px 294px;
+    border-radius: 15px;
+}
