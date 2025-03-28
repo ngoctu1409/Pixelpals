@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Pixelpals</title>
+	<link rel="stylesheet" href="main.css" />
+</head>
+<body>	
+	<section class ="tools">
+		<div class="tools-left">
+			<button id="pen">pen</button>
+
+			<ul class="shape">
+				<li>
+					<button class="shape-list">
+						<img src="main-image/shape.png" alt="shape" />
+					</button>
+					<ul class="sub-shape-list">
+						<li><button id="rectangle">Rectangle</button></li>
+						<li><button id="circle">Circle</button></li>
+						<li><button id="triangle">Triangle</button></li>
+					</ul>
+				</li>    
+			</ul>
+			
+			<li class="eraser-container">
+				<button id="eraser">eraser</button>
+				<input type="range" id="eraser-size" min="1" max="50" value="10" style="display: none;">
+			</li>
+			<button id="line">line</button>
+			<button id="bucket">bucket</button>
+			<button id="pallete">pallete</button>
+			<button id="selection">selection</button>
+			<button id="text">text</button>
+		</div>
+
+		<div class="tools-bottom">
+			<button id="library">library</button>
+			<button id="upload">upload</button>
+		</div>
+
+		<div class="tools-top">
+			<button id="clearCanvas">clear</button>
+			<button id="undo">undo</button>
+			<button id="save">save</button>
+			<div class ="menuPage">
+				<a href="menu.html">
+					<button class="back-button" id="click-to-menu()">
+						back
+					</button>
+				</a>
+			</div>
+		</div>
+	</section>
+
+	<section class="drawingBoard">
+		<canvas 
+			id="canvas" width="583" height="400">
+		</canvas>
+	</section>
+
+    
+	<script src="algorithm.js"></script>	
+</body>
+</html>
