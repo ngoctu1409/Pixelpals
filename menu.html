@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Pixelpals</title>
+	<link rel="stylesheet" href="menu.css" />
+</head>
+<body>
+	<div class ="mainPage">
+        <a href="main.html">
+            <button class="start-button" id="click-to-main()">
+                <img src="menu-image/start-button.png" alt="start button" />
+            </button>
+		</a>
+    </div>
+
+    <div class ="instructionPage">
+        <a href="instruction.html">
+            <button class="instruction-button" id="click-to-instruction()">
+                <img src="menu-image/instruction-button.png" alt="instruction button" />
+            </button>
+        </a>
+    </div>
+
+	<script>
+        const cometoStart = document.getElementById("click-to-main");
+        backBtn.addEventListener('click', () => {
+            window.location.href = "main.html";
+        });
+
+        const cometoInstruction = document.getElementById("click-to-instruction");
+        backBtn.addEventListener('click', () => {
+            window.location.href = "instruction.html";
+        });
+
+    </script>
+	
+</body>
+</html>
