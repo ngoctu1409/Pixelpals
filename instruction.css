@@ -1,0 +1,18 @@
+body{
+    background-image: url('instruction-image/background-instruction.png');
+    background-size: cover; 
+    background-position: center; 
+    background-repeat: no-repeat; 
+    background-attachment: fixed; 
+    z-index: -1;
+   
+}
+
+.back-button {
+    background: transparent; 
+    border: none; 
+    cursor: pointer;
+    outline: none;
+    position: fixed;
+    margin: 42px 830px;
+}
