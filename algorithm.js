@@ -24,25 +24,223 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 /* Khởi tạo canvas */
-const CELL_SIZE = 5;
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 let isDrawing = false;
+let isFilling = false;
 let currentTool = "";
 let currentColor = '#000000';
 let startX, startY, endX, endY;
 let prevMouseX, prevMouseY, snapshot;
 let eraserSize = 10;
+let imageData; 
+let offsetX, offsetY;
+let canvasSnapshot;
+let isSelectionMoved = false;
+
 
 window.addEventListener("load", () => {
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
 });
 
+
 const selectTool = (tool) => {
     currentTool = tool;
     ctx.lineWidth = tool === "pen" ? 1 : 0.5;
+    ctx.setLineDash([]);
+
+    if (tool !== "selection") {
+        canvasSnapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        selection = null;
+        isSelecting = false;
+        isDragging = false;
+    }
 };
+
+/* Selection tool */
+const SELECTION_STYLE = {
+    borderColor: "#00f",
+    borderWidth: 1,
+    borderDash: [5, 5],
+    fillColor: "rgba(0, 0, 255, 0.1)"
+};
+const selectionOutline = document.querySelector('.selection-outline');
+
+
+function startSelection(e) {
+    if (currentTool !== "selection") return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    if (selection && x >= selection.x && x <= selection.x + selection.width &&
+        y >= selection.y && y <= selection.y + selection.height) {
+        isDragging = true;
+        offsetX = x - selection.x;
+        offsetY = y - selection.y;
+        return;
+    }
+
+    // Bắt đầu tạo vùng chọn mới
+    isSelecting = true;
+    startX = x;
+    startY = y;
+    canvasSnapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+}
+
+function updateSelection(e) {
+    if (!isSelecting || currentTool !== "selection") return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    ctx.putImageData(canvasSnapshot, 0, 0);
+    
+    // Vẽ border nét đứt
+    ctx.setLineDash(SELECTION_STYLE.borderDash);
+    ctx.strokeStyle = SELECTION_STYLE.borderColor;
+    ctx.lineWidth = SELECTION_STYLE.borderWidth;
+    ctx.strokeRect(startX, startY, x - startX, y - startY);
+    
+    // Vẽ overlay màu
+    ctx.fillStyle = SELECTION_STYLE.fillColor;
+    ctx.fillRect(startX, startY, x - startX, y - startY);
+
+    selectionOutline.style.display = 'block';
+    selectionOutline.style.left = `${Math.min(startX, x)}px`;
+    selectionOutline.style.top = `${Math.min(startY, y)}px`;
+    selectionOutline.style.width = `${Math.abs(x - startX)}px`;
+    selectionOutline.style.height = `${Math.abs(y - startY)}px`;
+}
+
+    
+function finalizeSelection(e) {
+    
+    if (!isSelecting || currentTool !== "selection") return;
+
+    const rect = canvas.getBoundingClientRect();
+    const endX = e.clientX - rect.left;
+    const endY = e.clientY - rect.top;
+
+    selection = {
+        x: Math.min(startX, endX),
+        y: Math.min(startY, endY),
+        width: Math.abs(endX - startX),
+        height: Math.abs(endY - startY),
+        originalX: Math.min(startX, endX), 
+        originalY: Math.min(startY, endY)  
+    };
+
+    if (selection.width > 0 && selection.height > 0) {
+        imageData = ctx.getImageData(selection.x, selection.y, selection.width, selection.height);
+        
+        // KHÔNG clear vùng gốc
+        ctx.putImageData(canvasSnapshot, 0, 0); 
+        
+        // Giữ outline hiển thị
+        selectionOutline.style.display = 'block';
+        selectionOutline.style.left = `${selection.x}px`;
+        selectionOutline.style.top = `${selection.y}px`;
+        selectionOutline.style.width = `${selection.width}px`;
+        selectionOutline.style.height = `${selection.height}px`;
+    }
+
+    isSelecting = false;
+}
+
+function moveSelection(e) {
+    if (!isDragging || !selection || !imageData) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    // Giới hạn di chuyển trong canvas
+    const newX = Math.max(0, Math.min(x - offsetX, canvas.width - selection.width));
+    const newY = Math.max(0, Math.min(y - offsetY, canvas.height - selection.height));
+
+    // Cập nhật vị trí
+    selection.x = newX;
+    selection.y = newY;
+
+    // Khôi phục trạng thái gốc và vẽ cả 2 vùng
+    ctx.putImageData(canvasSnapshot, 0, 0);
+    
+    // Vẽ hình gốc mờ
+    ctx.globalAlpha = 0.3;
+    ctx.putImageData(imageData, selection.originalX, selection.originalY);
+    
+    // Vẽ hình mới
+    ctx.globalAlpha = 1;
+    ctx.putImageData(imageData, newX, newY);
+
+    // Cập nhật outline
+    selectionOutline.style.left = `${newX}px`;
+    selectionOutline.style.top = `${newY}px`;
+
+    canvasSnapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+}
+
+function updateSelectionData() {
+    if (selection && imageData) {
+        ctx.putImageData(canvasSnapshot, 0, 0);
+        ctx.putImageData(imageData, selection.x, selection.y);
+        canvasSnapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    }
+} 
+
+function stopDragging() {
+    if (!isDragging || !selection) return;
+
+    // Xóa vùng gốc
+    ctx.clearRect(
+        selection.originalX,
+        selection.originalY,
+        selection.width,
+        selection.height
+    );
+    
+    // Vẽ vĩnh viễn ở vị trí mới
+    ctx.putImageData(imageData, selection.x, selection.y);
+    
+    // Cập nhật snapshot
+    canvasSnapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    
+    // Reset trạng thái
+    isDragging = false;
+    selectionOutline.style.display = 'none';
+    selection = null;
+    imageData = null;
+}
+
+
+canvas.addEventListener("mousedown", (e) => {
+    if (currentTool === "selection") startSelection(e);
+    else if (currentTool !== "selection") startDraw(e); // Giữ nguyên chức năng vẽ
+});
+
+canvas.addEventListener("mousemove", (e) => {
+    if (currentTool === "selection") {
+        if (isSelecting) updateSelection(e);
+        if (isDragging) moveSelection(e);
+    } else {
+        drawing(e);
+    }
+});
+
+canvas.addEventListener("mouseup", (e) => {
+    if (currentTool === "selection") {
+        if (isSelecting) finalizeSelection(e);
+        if (isDragging) stopDragging();
+    } else {
+        stopDraw(e);
+    }
+
+    canvasSnapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+});
 
 /* Thuật toán Bresenham vẽ đường thẳng */
 function drawLine(x1, y1, x2, y2) {
@@ -162,6 +360,7 @@ const erasing = (e) => {
     ctx.lineTo(e.offsetX, e.offsetY);
     ctx.stroke();
     ctx.globalCompositeOperation = "source-over"; 
+    canvasSnapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -222,17 +421,94 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+/* Chọn màu */
+let colorPicker; 
+
+function setup() {
+    noCanvas(); 
+
+    colorPicker = createColorPicker(currentColor);
+    colorPicker.style('display', 'none'); 
+    colorPicker.parent(document.body);
+
+    colorPicker.elt.style.border = "none";
+    colorPicker.elt.style.background = "none";
+    colorPicker.elt.style.width = "0px";
+    colorPicker.elt.style.height = "0px";
+    colorPicker.elt.style.padding = "0";
+    colorPicker.elt.style.overflow = "hidden";
+
+    colorPicker.input(() => {
+        currentColor = colorPicker.value();
+        ctx.strokeStyle = currentColor; 
+    });
+}
+
+/* Thuật toán flood fill để tô màu */
+function floodFill(x, y, newColor) {
+    let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let data = imageData.data;
+
+    let getPixelIndex = (x, y) => (y * canvas.width + x) * 4;
+
+    let oldColor = data.slice(getPixelIndex(x, y), getPixelIndex(x, y) + 4);
+    if (JSON.stringify(oldColor) === JSON.stringify(newColor)) return; 
+    let queue = [[x, y]];
+    let visited = new Set();
+    let pixelsPerFrame = 100; 
+
+    function processNextBatch() {
+        let pixelsProcessed = 0;
+
+        while (queue.length > 0 && pixelsProcessed < pixelsPerFrame) {
+            let [cx, cy] = queue.shift();
+            let index = getPixelIndex(cx, cy);
+            
+            if (cx < 0 || cy < 0 || cx >= canvas.width || cy >= canvas.height || visited.has(`${cx},${cy}`)) continue;
+
+            let currentColor = data.slice(index, index + 4);
+            if (JSON.stringify(currentColor) !== JSON.stringify(oldColor)) continue;
+
+            
+            data[index] = newColor[0]; // R
+            data[index + 1] = newColor[1]; // G
+            data[index + 2] = newColor[2]; // B
+            data[index + 3] = 255; // Alpha
+
+            visited.add(`${cx},${cy}`);
+            pixelsProcessed++;
+
+            // Thêm pixel lân cận vào hàng đợi
+            queue.push([cx + 1, cy]);
+            queue.push([cx - 1, cy]);
+            queue.push([cx, cy + 1]);
+            queue.push([cx, cy - 1]);
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+
+        if (queue.length > 0) {
+            requestAnimationFrame(processNextBatch);
+        }
+    }
+
+    requestAnimationFrame(processNextBatch);
+
+        canvasSnapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+}
+
 
 /* Bắt đầu vẽ */
+
 const startDraw = (e) => {
-    isDrawing = true;
-    startX = e.offsetX;
-    startY = e.offsetY;
-    prevMouseX = e.offsetX;
-    prevMouseY = e.offsetY;
-    ctx.beginPath();
-    ctx.moveTo(startX, startY);
-    snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        isDrawing = true;
+        startX = e.offsetX;
+        startY = e.offsetY;
+        prevMouseX = e.offsetX;
+        prevMouseY = e.offsetY;
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
 };
 
 /* Khi kéo chuột */
@@ -262,6 +538,7 @@ const stopDraw = (e) => {
     isDrawing = false;
     endX = e.offsetX;
     endY = e.offsetY;
+    canvasSnapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
     if (currentTool === "pen") {
         ctx.lineTo(endX, endY);
@@ -294,6 +571,17 @@ const stopDraw = (e) => {
 canvas.addEventListener("mousedown", startDraw);
 canvas.addEventListener("mousemove", drawing);
 canvas.addEventListener("mouseup", stopDraw);
+canvas.addEventListener("click", (e) => {
+    if (currentTool === "bucket") {
+        let newColor = [
+            parseInt(currentColor.slice(1, 3), 16),
+            parseInt(currentColor.slice(3, 5), 16),
+            parseInt(currentColor.slice(5, 7), 16),
+            255
+        ];
+        floodFill(e.offsetX, e.offsetY, newColor);
+    }
+});
 
 
 document.getElementById("pen").addEventListener("click", () => {
@@ -327,3 +615,42 @@ document.getElementById("eraser").addEventListener("click", function() {
     selectTool("eraser");
 });
 
+document.getElementById("pallete").addEventListener("click", () => {
+    colorPicker.elt.style.display = "block"; 
+    colorPicker.elt.click(); 
+});
+
+document.getElementById("bucket").addEventListener("click", () => {
+    selectTool("bucket");
+});
+
+document.getElementById("clearCanvas").addEventListener("click", () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+});
+
+document.getElementById("save").addEventListener("click", () => {
+    const tempCanvas = document.createElement("canvas");
+    const tempCtx = tempCanvas.getContext("2d");
+
+    tempCanvas.width = canvas.width;
+    tempCanvas.height = canvas.height;
+
+    tempCtx.fillStyle = "#FFFFFF"; 
+    tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+    tempCtx.drawImage(canvas, 0, 0);
+
+    const link = document.createElement("a");
+    link.download = `${Date.now()}.jpg`;
+    link.href = tempCanvas.toDataURL("image/jpeg", 1.0);
+    link.click();
+});
+
+document.getElementById("selection").addEventListener("click", () => {
+    selectTool("selection");
+});
+
+// Thêm sự kiện ESC để hủy
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') cancelSelection();
+});
