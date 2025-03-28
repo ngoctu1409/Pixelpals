@@ -1,0 +1,41 @@
+body{
+    background-image: url('menu-image/background-menu.PNG');
+    background-size: cover; 
+    background-position: center; 
+    background-repeat: no-repeat; 
+    background-attachment: fixed; 
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    flex-direction: column;
+   
+}
+
+.start-button {
+    background: transparent; 
+    border: none; 
+    cursor: pointer;
+    outline: none;
+    position: absolute;
+    top: 57.5vh; 
+    left: 45.2vw;
+    transform: translate(-50%, -50%); 
+     
+}
+
+.instruction-button {
+    background: transparent; 
+    border: none; 
+    cursor: pointer;
+    outline: none;
+    position: absolute;
+    top: 74.5vh; 
+    left: 45.2vw;
+    transform: translate(-50%, -50%); 
+
+}
+
+.start-button img, .instruction-button img {
+    width: 100%; 
+    height: auto;
+}
