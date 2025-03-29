@@ -6,7 +6,6 @@ body{
     background-attachment: fixed; 
     display: flex;
     flex-direction: column;
-   
 }
 
 /* Dropdown menu của shape */
@@ -15,30 +14,11 @@ ul,
     list-style: none; 
 }
 
-.shape-list {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-}
-
-.sub-shape-list {
-    display: none; 
-    position: absolute;
-    background: white;
-    padding: 10px;
-    margin-top: 5px;
-}
-
-.sub-shape-list.active {
-    display: block; 
-}
-
 /* Thanh trượt eraser */
 #eraser-size {
     display: none;  
     position: absolute;
-    margin-top: 5px;
+    margin: 202px 78px;
     height: 100px;  
     writing-mode: vertical-lr;
     transform: rotate(180deg);
@@ -72,4 +52,136 @@ ul,
     position: absolute;
     margin: 153px 294px;
     border-radius: 15px;
+    z-index: -1;
+}
+
+
+.selection-outline {
+    position: absolute;
+    pointer-events: none;
+    display: none; 
+    z-index: 2; 
+    box-shadow: 0 0 3px rgba(0, 0, 255, 0.3);
+    transition: all 0.1s ease;
+    border: 2px dashed #2196F3;
+    background-color: rgba(0, 0, 255, 0.05);
+    transition: all 0.05s ease-out;
+    box-shadow: 0 0 0 1px rgba(0, 0, 255, 0.5);
+}   
+
+.pen-button,
+.shape-list,
+.eraser-button,
+.line-button,
+.bucket-button,
+.pallete-button,
+.selection-button,
+.text-button,
+.library-button,
+.upload-button,
+.clearCanvas-button,
+.undo-button,
+.save-button,
+.back-button
+ {
+    background: transparent !important; 
+    border: none !important; 
+    cursor: pointer; 
+    position: absolute;
+    outline: none; 
+}
+
+.pen-button {
+    margin: 141px 102px;
+}
+
+.eraser-button {
+    margin: 202px 86px;
+}
+
+.back-button {
+    margin: 26px 835px;
+}
+
+.save-button {
+    margin: 24px 732px;
+}
+
+.shape-list {
+    margin: 133px 136px;
+}
+
+
+.sub-shape-list {
+    display: none; 
+    position: absolute;
+    background: #FFFBDD;
+    border: 5px solid #f14f81;
+    padding: 68px 24px;
+    margin: 114px 230px;
+    border-radius: 20px;
+    z-index: 1;
+}
+
+.sub-shape-list.active {
+    display: block; 
+}
+
+.bucket-button {
+    margin: 280px 99px;
+}
+
+.line-button {
+    margin: 206px 178px;
+}
+
+.pallete-button {
+    margin: 267px 167px;
+}
+
+.clearCanvas-button {
+    margin: 26px 538px;
+}
+
+.undo-button {
+    margin: 26px 640px;
+}
+
+.selection-button {
+    margin: 355px 101px;
+}
+
+.text-button {
+    margin: 354px 179px;
+}
+
+.library-button {
+    margin: 476px 101px;
+}
+
+.upload-button {
+    margin: 475px 193px;
+}
+
+.rectangle-button,
+.circle-button,
+.triangle-button
+{
+    background: transparent !important; 
+    border: none !important; 
+    cursor: pointer; 
+    position: absolute;
+    outline: none; 
+}
+
+.rectangle-button {
+    margin: -59px -29px;
+}
+
+.circle-button {
+    margin: -16px -29px;
+}
+
+.triangle-button {
+    margin: 24px -29px;
 }
